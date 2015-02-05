@@ -3,11 +3,10 @@
         <head>
                 <meta charset="utf-8">
                 <title>Demo: dojo/request/script</title>
-                <link rel="stylesheet" href="style.css" media="screen">
-                <link rel="stylesheet" href="../../../resources/style/demo.css" media="screen">
+                <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dijit/themes/claro/claro.css">
         </head>
-        <body>
-                <h1>Demo: dojo/request/script</h1>
+        <body class="claro">
+                <h1>Jukebox</h1>
                 <p>Click the button below to see dojo/request/script in action.</p>
                 <div>
                         <button class="action" id="makeRequest">Make JSONP Request</button>
@@ -15,6 +14,9 @@
                 <br /><br />
                 <div id="resultDiv">
                 </div>
+
+                <div id="grid" class="claro"></div>
+
                 <!-- load dojo -->
                 <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
                 <script>
@@ -38,11 +40,78 @@
                                                 query: {
                                                         clienttime: dateNow
                                                 }
-                                        }).then(function(data){
+                                                }).then(function(data){
                                                 // Display the result
                                                 resultDiv.innerHTML = JSON.stringify(data);
                                         });
                                 });
+                        });
+
+                        require({
+                                baseUrl: 'http://ajax.googleapis.com/ajax/libs/dojo/1.9.3/',
+                                packages: [{
+                                        name: 'dojo',
+                                        location: 'dojo'
+                                        }, {
+                                        name: 'dgrid',
+                                        location: 'http://dojofoundation.org/packages/dgrid/js/dgrid'
+                                        }, {
+                                        name: 'put-selector',
+                                        location: 'http://dojofoundation.org/packages/dgrid/js/put-selector'
+                                        }, {
+                                        name: 'xstyle',
+                                        location: 'http://dojofoundation.org/packages/dgrid/js/xstyle'
+                                }]
+                        }, [
+                        'dojo/_base/declare',
+                        'dojo/_base/lang',
+                        'dojo/request/script',
+                        'dojo/store/util/QueryResults',
+                        'dgrid/OnDemandGrid'
+                        ], function (declare, lang, request, QueryResults, OnDemandGrid) {
+                                var GitHubStore = declare(null, {
+                                        target: '',
+                                        idProperty: '_id',
+
+                                        constructor: function (options) {
+                                                lang.mixin(this, options);
+                                        },
+
+                                        get: function (id) {
+                                                return request(this.target, {
+                                                        jsonp: 'callback'
+                                                        }).then(function (result) {
+                                                        // The information we want is on the 'data' property of the returned results
+                                                        return result;
+                                                });
+                                        },
+
+                                        getIdentity: function (object) {
+                                                return object[this.idProperty];
+                                        },
+
+                                        query: function (query, queryOptions) {
+                                                var resultPromise = request(this.target, {
+                                                        query: query,
+                                                        jsonp: 'callback'
+                                                        }).then(function (result) {
+                                                        // The information we want is on the 'data' property of the returned results
+                                                        return result.data;
+                                                });
+
+                                                // QueryResults will add the 'total' property as well as iteration methods
+                                                return QueryResults(resultPromise);
+                                        }
+                                });
+
+                                var store = new GitHubStore({
+                                        target: 'http://127.0.0.1:8080/albums'
+                                });
+
+                                store.get('54d36a8698b6cd224f9d487c').then(function(item){
+                                        console.log(item);
+                                });
+
                         });
                 </script>
         </body>
