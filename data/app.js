@@ -11,6 +11,7 @@ var server = restify.createServer({
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 server.use(restify.CORS());
+server.use(restify.jsonp());
 
 var connection_string = '192.168.59.103:27017/myapp';
 var db = mongojs(connection_string, ['jukebox']);
