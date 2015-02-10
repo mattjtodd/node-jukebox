@@ -1,10 +1,12 @@
 {
-  "name": "jukebox-server",
+  "name": "jukebox",
   "version": "0.0.1",
   "private": true,
+
   "dependencies": {
-    "debug": "~2.1.1",
+    "debug": "*",
     "restify": "*",
-    "mongojs": "*"
+    "yargs": "*",
+    "mongodb": "~2.0"
   }
 }
